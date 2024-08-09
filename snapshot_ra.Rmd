@@ -1,0 +1,251 @@
+---
+title: "MEDS Snapshot: `r params$condition`"
+output: html_document
+params:
+  condition: "holder"
+  selected_meds: "holder"
+  acr50_val: "holder"
+  das28_val: "holder"
+  haq_val: "holder"
+  disc_val: "holder"
+  si_val: "holder"
+  ijr_val: "holder"
+  ra_data: "holder"
+---
+
+<style>
+  .flat-table {
+    display: block;
+    font-family: sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-size: 115%;
+    overflow: auto;
+    width: auto;
+  }
+  h1 {
+  color: #145369;
+  font-weight: bold;
+  }
+  table {
+  width: 100%;
+  margin-bottom: 0px !important;
+  }
+  thead {
+    background-color: #0079C2;
+    color: white;
+    font-weight: normal;
+    padding: 20px 30px;
+    text-align: center;
+  }
+  tbody {
+    background-color: rgb(255, 255, 255);
+    color: rgb(111, 111, 111);
+    padding: 20px 30px;
+  }
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = "asis")
+
+library(kableExtra)
+library(knitr)
+library(dplyr)
+library(openxlsx)
+library(ggplot2)
+library(ggrepel)
+
+acr50.val <- params$acr50_val
+das28.val <- params$das28_val
+haq.val <- params$haq_val
+disc.val <- params$disc_val
+si.val <- params$si_val
+ijr.val <- params$ijr_val
+meds.selected <- params$selected_meds
+ra_data <- params$ra_data
+```
+
+<img style="float: right; width: 200px; margin-top: -50px" src="https://www.bcbs.com/themes/custom/bcbs/img/full-logo.svg">
+
+Most recent literature search: November 30, 2018 
+
+\
+
+```{r}
+# drugs <- meds.selected
+# d1 <- data.frame(drugs) %>% rename('Drug Set' = 'drugs')
+# d1 <- kbl(d1) %>%
+#   kable_styling(bootstrap_options = "striped", full_width = T, position = "left")
+# d1
+ncol.split <- round(length(meds.selected)/2, digits = 0) + 1
+col1 <- data.frame(x = meds.selected[1:ncol.split])
+col2 <- data.frame(x2 = meds.selected[(ncol.split+1):length(meds.selected)])
+
+for (i in 1:(nrow(col1) - nrow(col2))) {
+  col2[nrow(col2)+1,] <- NA
+}
+
+data <- cbind(col1, col2)
+
+data <- sapply(data, as.character) 
+data[is.na(data)] <- ""
+d1 <- kbl(data, col.names = NULL) %>%
+  kable_styling(bootstrap_options = "striped", full_width = T, position = "left") %>%
+  add_header_above(c("Drug Set" = 2))
+d1
+```
+
+```{r}
+
+### Efficacy measures
+acr50 <- paste0("ACR 50 (", acr50.val, "% weight)")
+das28 <- paste0("DAS 28 (", das28.val, "% weight)")
+haq <- paste0("HAQ 50 (", haq.val, "% weight)")
+data <- c(acr50, das28, haq)
+d1 <- data.frame(data) %>% rename('Efficacy Measures' = 'data')
+
+### Safety measures
+disc <- paste0("Discontinuation (", disc.val, "% weight)")
+si <- paste0("Serious Infection (", si.val, "% weight)")
+ijr <- paste0("Injection Site Reaction (", ijr.val, "% weight)")
+data <- c(disc, si, ijr)
+d2 <- data.frame(data) %>% rename('Safety Measures' = 'data')
+
+data <- cbind(d1, d2)
+
+d1 <- kbl(data) %>%
+  kable_styling(bootstrap_options = "striped", full_width = T, position = "left")
+d1
+```
+
+\
+
+```{r, fig.align = 'center'}
+
+d1 <- kbl(data.frame(""), col.names = NULL) %>%
+  kable_styling(bootstrap_options = NULL, full_width = T, position = "left") %>%
+  add_header_above(c("Clinical Effectiveness" = 1))
+d1
+
+medsRA <- ra_data %>%
+  rename("Composite.NNH" = "cNNH",
+         "Composite.NNT" = "cNNT",
+         "Clinical.effectiveness.ranking" = "ceRank",
+         "Adjusted.Value.Score" = "AVScore",
+         "Name" = "Arm")
+medsRA$cRDBen<-1/medsRA$Composite.NNT
+medsRA<-medsRA %>%
+  mutate(pc_rank_ben = rank(cRDBen)/length(cRDBen))
+medsRA$fromNNT<-(medsRA$pc_rank_ben-0.5)*100
+medsRA$cRDHarm<-1/medsRA$Composite.NNH
+medsRA<-medsRA %>%
+  mutate(pc_rank_harm = rank(cRDHarm)/length(cRDHarm))
+medsRA$fromNNH<-(0.5-medsRA$pc_rank_harm)*100
+medsRA$Name2<-sub("\\+.*", "", medsRA$Name)
+medsRA$Composite.NNH1<-ifelse(medsRA$Composite.NNH<=500,medsRA$Composite.NNH,ifelse(medsRA$Composite.NNH<11000,NA,medsRA$Composite.NNH-10500))
+medsRA <- medsRA[!is.na(medsRA$Composite.NNH1) ,]
+# medsRA$Adjusted.Value.Score<-paste(medsRA$MeanLL,'-',medsRA$MeanUL)
+# ggplot(medsRA, aes(x=Composite.NNT, y=Composite.NNH))
+names(medsRA)[names(medsRA) == "Clinical.effectiveness.ranking"] <- "Ranking"
+
+# g<-ggplot(medsRA[which(medsRA$Ranking=="A"),], aes(y=Composite.NNT, x=Composite.NNH))+
+#   geom_point(aes(col=Name,shape=Ranking), size=6)+
+#   geom_text_repel(aes(label=paste(Name, Adjusted.Value.Score),size=1),show.legend = FALSE)+
+#   ggtitle("Clinical Effectiveness of RA Medications",
+#           subtitle="Composite NNT Vs Composite NNH") + xlab("Composite NNH") + ylab("Composite NNT")+
+#   theme(
+#     legend.position="none",
+#     panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+# g
+g<-ggplot(medsRA[which(medsRA$Ranking=="A"|medsRA$Ranking=="B"),], aes(y=fromNNT, x=fromNNH))+
+  geom_point(aes(col=Name2,shape=Ranking), size=3)+ 
+  geom_label_repel(aes(label=Name2),show.legend = FALSE, size=3, hjust = 0.5, vjust = 0.5, fill = alpha(c("white"),0.5))+
+ theme(
+    legend.position="bottom",
+    panel.grid.minor = element_blank(),
+    axis.ticks = element_line(size = 2),
+    axis.title=element_text(size=15)
+  )+
+  scale_color_discrete(guide='none')+
+  scale_x_continuous("% point from median composite NNH", breaks=c(-50,-20,0,20,50), limits = c(-50,50))+
+  scale_y_continuous("% point from median composite NNT", breaks=c(-50,-20,0,20,50))
+plot(g)
+# medsRA <- ra_data %>%
+#   rename("fromNNH" = "cNNH",
+#          "fromNNT" = "cNNT",
+#          "Ranking" = "ceRank",
+#          "Adjusted.Value.Score" = "AVScore",
+#          "Name2" = "Arm")
+# 
+# g<-ggplot(medsRA[which(medsRA$Ranking=="A"|medsRA$Ranking=="B"),], aes(y=fromNNT, x=fromNNH))+
+#   geom_point(aes(col='black',shape=Ranking), size=6)+ 
+#   geom_label_repel(aes(label=Name2),show.legend = FALSE, size=6, hjust = 0.5, vjust = 1, fill = alpha(c("white"),0.5))+
+#   theme(
+#     legend.position="bottom",
+#     panel.grid.minor = element_blank(),
+#     axis.ticks = element_line(size = 2),
+#     axis.title=element_text(size=15)
+#   )+
+#   scale_color_discrete(guide=FALSE)+
+#   scale_x_continuous("% point from median composite NNH", breaks=c(-50,-20,0,20,50), limits = c(-50,50))+
+#   scale_y_continuous("% point from median composite NNT", breaks=c(-50,-20,0,20,50))
+# g
+
+```
+
+\
+
+```{r, figures-side, fig.show="hold", out.width="50%"}
+
+d1 <- kbl(data.frame(""), col.names = NULL) %>%
+  kable_styling(bootstrap_options = NULL, full_width = T, position = "left") %>%
+  add_header_above(c("Adjusted Value Score" = 1))
+d1
+
+data <- ra_data %>%
+  mutate(MeanLL = as.numeric(MeanLL)) %>%
+  mutate(MeanUL = as.numeric(MeanUL))
+
+data.A <- data %>% filter(ceRank == 'A')
+data.B <- data %>% filter(ceRank == 'B')
+
+# 'A' Ranking
+g1 <- ggplot(data.A, aes(x=MeanLL, xend=MeanUL, y=Arm, yend=Arm, color=ceRank)) +
+  theme_bw() + 
+  geom_segment(size = 8, color = "#A3E982") + 
+  labs(title=NULL, x=NULL, y=NULL) +
+  scale_x_continuous(n.breaks = 10) +
+  theme(legend.position="none",
+        panel.border = element_blank(),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 12)
+        ) 
+
+# 'B' Ranking 
+g2 <- ggplot(data.B, aes(x=MeanLL, xend=MeanUL, y=Arm, yend=Arm, color=ceRank)) +
+  theme_bw() + 
+  geom_segment(size = 8, color = "#0074BB") + 
+  labs(title=NULL, x=NULL, y=NULL) +
+  scale_x_continuous(n.breaks = 10) +
+  theme(legend.position="none",
+        panel.border = element_blank(),
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 12)
+        ) 
+
+par(mar = c(4, 4, .1, .1))
+plot(g1)
+plot(g2)
+
+```
+
+\
+\
+
+```{r}
+
+div(h5(paste0("Snapshot created on: ", format(Sys.time(), "%I:%M %p %Z  %m-%d-%Y"))), 
+    style = "font-family: sans-serif; 
+    color: #145369;
+    font-weight: bold;")
+
+```

@@ -1,0 +1,13 @@
+name: meds_mode
+title: MEDS Model
+username: CA08449@bcbsa.com
+account: CA08449@bcbsa.com
+server: www.bcbsaoca.com
+hostUrl: https://www.bcbsaoca.com/__api__
+appId: 125
+bundleId: 3608
+url: https://www.bcbsaoca.com/MEDS_Test/
+when: 1664391161.09793
+lastSyncTime: 1664391161.09794
+asMultiple: FALSE
+asStatic: FALSE

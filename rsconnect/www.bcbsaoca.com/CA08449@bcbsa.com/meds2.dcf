@@ -1,0 +1,13 @@
+name: meds2
+title: MEDS2
+username: CA08449@bcbsa.com
+account: CA08449@bcbsa.com
+server: www.bcbsaoca.com
+hostUrl: https://www.bcbsaoca.com/__api__
+appId: 126
+bundleId: 3725
+url: https://www.bcbsaoca.com/MEDS_Dev/
+when: 1668797047.5368
+lastSyncTime: 1668797047.53681
+asMultiple: FALSE
+asStatic: FALSE

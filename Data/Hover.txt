@@ -1,0 +1,56 @@
+Composite NNT<-Composite Numbers Needed to Treat: Weighted average of numbers needed to treat to achieve benefits outcomes.
+Composite NNH<-Composite Numbers Needed to Harm: Weighted average of numbers needed to treat to achieve harms outcomes.
+Clinical Effectiveness Ranking<-Clinical Effectiveness Ranking based on each drug's distance of composite NNT/NNH from the median composite NNT/NNH. Click on 'More Info' for the calculation methodology and examples.
+Adjusted Value Score: Adjusted value score is the estimated percentage of full value after discounting the difference in benefitted vs not benefitted ratio calculated using optimum NNT and observed NNT for the drug. Adjusted value score above 100 is assigned as 100 and adjusted value score below 0 is assigned 0.
+Medication<-Medications for the disease/condition included in the analysis.
+
+RA
+ACR 50<-American College of Rheumatology (ACR) 50 Criteria
+DAS 28<-Disease Activity Score (DAS) - 28
+HAQ<-Health Assessment Questionnaire – Disability Index (HAQ-DI)
+
+Severe AE<-Serious Infection (pneumonia or upper respiratory infection, infection requiring IV antibodies or any hospitalization due to infection)
+IJR/Diarrhea<-Injection Site Reaction (Injectable Drug) or gastrointestinal side effects (Oral Drug)
+Discontinuation<-Discontinuation due to adverse event
+
+MS
+Benefit Outcomes:
+Relapse Free <- Percent of study population who are relapse free at the end of the follow-up period
+Disability Progression<- Disability progression measured using Kurtzke Extended Disability Status Scale (EDSS) – Sustained reduction of 1 point or more for at least 12 weeks  
+
+Harms Outcomes
+Discontinuation <- Discontinuation due to adverse event
+Hepatotoxicity <- Liver toxicity (confirmed alanine aminotransferase or aspartate aminotransferase at least three times the upper limit of normal, with or without raised bilirubin, or as defined by investigators)
+Influenza <- Flu-like reactions
+Injection reaction <- Injection site reactions (for injectables or infusions)
+Diarrhea <- Diarrhea (for oral agents)
+
+Hemophilia A: Prophylaxis
+Benefit Outcomes
+Prevention of Bleeding <- Proportion of patients with no reported bleeds during the follow-up period
+Number of Bleeding Episodes <- Number of bleeding events per person/per month (Calculated from Mean Annualized Bleeding Rate) during the follow-up period
+
+Hemophilia A: On-demand
+Benefit Outcomes
+Bleeding Control <- Proportion of bleeding episodes that is controlled using no more than 2 infusions
+
+Severe Asthma
+Benefit Outcomes:
+Acute exacerbation of asthma <- Proportion of patients with acute exacerbation of asthma during the follow-up period
+Hospitalization/ED visit rate <- Rate of Hospitalization/Emergency Department Visit during the follow-up period
+
+Harms Outcomes
+Discontinuation <- Discontinuation due to adverse events
+Severe Adverse Events <- Severe adverse events during the follow-up period (as defined by the investigators)
+
+Plaque Psoriasis
+Benefit Outcomes:
+PASI 90 <- Psoriasis Area and Severity Index (PASI) 90
+IGA 0/1 <- Physician Global Assessment (PGA) or Investigator’s Global Assessment (IGA) (‘clear’/’almost clear’)
+
+Harms Outcomes
+Discontinuation <- Discontinuation due to adverse events
+Severe Adverse Events <- Severe adverse events during the follow-up period (as defined by the investigators)
+
+
+
